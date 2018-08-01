@@ -264,57 +264,6 @@ public class FreqGo : MonoBehaviour {
 
 		// set the velocity max by interpolating with freq
 		frequency();
-
-		// if the user isn't looking then manage their walking
-		if (!looking)
-		{
-			if ((display.acceleration.y >= 0.75f || display.acceleration.y <= -0.75f))
-			{
-				if (wasTwo)
-				{ //we are transitioning from phase 2 to 1
-					method1StartTimeGrow = Time.time;
-					wasTwo = false;
-					wasOne = true;
-				}
-			}
-			else
-			{
-				if (wasOne)
-				{
-					method1StartTimeDecay = Time.time;
-					wasOne = false;
-					wasTwo = true;
-				}
-			}
-			if ((display.acceleration.y >= 0.75f || display.acceleration.y <= -0.75f))
-			{
-				velocity = velocityMax + velocityMax / 4.0f - (velocityMax + velocityMax / 4.0f - velocity) * Mathf.Exp((method1StartTimeGrow - Time.time) / 0.5f); //grow
-			}
-			else
-			{
-				// if the acceleration values are low, indicates the user is walking slowly, and exponentially decrease the velocity to 0
-				velocity = 0.0f - (0.0f - velocity) * Mathf.Exp((method1StartTimeDecay - Time.time) / decayRate); //decay
-			}
-		}
-		else
-		{
-			velocity = 0f;
-		}
-
-		// multiply intended speed (called velocity) by delta time to get a distance, then multiply that distamce
-		// by the unit vector in the look direction to get displacement.
-		if(velocity < 0f)
-		{
-			velocity = 0f;
-		}
-
-		// translate
-		transform.Translate(xVal * velocity * Time.fixedDeltaTime, 0, zVal * velocity * Time.fixedDeltaTime);
-
-		// debug
-		totalVelocityMax += velocityMax;
-		totalVelocity += velocity;
-		totalVelocityCount++;
 	}
 
 	#region NetworkingCode
