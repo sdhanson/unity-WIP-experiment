@@ -113,7 +113,7 @@ public class AccelerometerInputRate : MonoBehaviour {
 			Time.time + ";" + 
 
 			// NEED TO CHANGE TO WHATEVER IS ANALOGOUS TO THIS IN GIO
-			OVRInput.GetDown(OVRInput.Button.One) + ";" +
+			OVRInput.Get(OVRInput.Button.One) + ";" +
 
 			display.acceleration.x + ";" + 
 			display.acceleration.y + ";" + 
@@ -128,10 +128,13 @@ public class AccelerometerInputRate : MonoBehaviour {
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall;
+			gateCollider.isTouchingWall + ";";
+		
+		File.AppendAllText (path, appendText);
 
         // do the movement algorithm, more details inside
         move();
+
 
 
         if (myClient != null)

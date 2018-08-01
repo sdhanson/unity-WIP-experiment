@@ -8,21 +8,27 @@ using System.Text;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public class AccelerometerInput6 : MonoBehaviour
-{
-    // set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
-    public float height = 1.75f;
-    public float ht = 2.8f;
-    public float lt = -2.2f;
+public class FreqGo : MonoBehaviour {
 
-    // used to determine direction to walk
-    private float yaw;
+	// set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
+	public float height = 1.75f;
+	public float ht = 2.8f;
+	public float lt = -2.2f;
+
+	// values for the INDIVIDUALIZED velocity equation
+	// given in python script that quadratically fits freq and speed
+	public float a = -0.2536f;
+	public float b = 1.03965f;
+	public float c = 0.30079592f;
+
+	// used to determine direction to walk
+	private float yaw;
 	private float rad;
 	private float xVal;
 	private float zVal;
 
-    // determine if person is picking up speed or slowing down
-    public static float velocity = 0f;
+	// determine if person is picking up speed or slowing down
+	public static float velocity = 0f;
 	public static float method1StartTimeGrow = 0f;
 	public static float method1StartTimeDecay = 0f;
 	//phase one when above (+/-) 0.10 threshold
@@ -60,26 +66,35 @@ public class AccelerometerInput6 : MonoBehaviour
 	// if user hasn't stepped in a while, firstStep is set to true so there is no lag in the starting step
 	private bool firstStep = true;
 
-	// variable for debugging to see if we are counting the right number of steps
+	// variable for debugging
 	private float stepCount = 0f;
+	float totalVelocity = 0f;
+	float totalVelocityMax = 0f;
+	int totalVelocityCount = 0;
+	float test = 0f;
 
-    // initialize display to get accelerometer from Oculus GO
-    OVRDisplay display;
+	// sara's values for the interpolation for debugging
+	//float a = -0.08928571f;
+	//float b = 0.78571429f;
+	//float c = 0.42946429f;
 
-	void Start ()
+	// initialize display to get accelerometer from Oculus GO
+	OVRDisplay display;
+
+	void Start()
 	{
 		// enable the gyroscope on the phone
 		Input.gyro.enabled = true;
 		// if we are on the right VR, then setup a client device to read transform data from
 		if (Application.platform == RuntimePlatform.Android)
-			SetupClient ();
+			SetupClient();
 
 		// user must be looking ahead at the start
-		eulerX = InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.x;
-		eulerZ = InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.z;
+		eulerX = InputTracking.GetLocalRotation(XRNode.Head).eulerAngles.x;
+		eulerZ = InputTracking.GetLocalRotation(XRNode.Head).eulerAngles.z;
 
 		// initialize the oculus go display
-		display = new OVRDisplay ();
+		display = new OVRDisplay();
 
 	}
 
@@ -87,15 +102,14 @@ public class AccelerometerInput6 : MonoBehaviour
 		OVRInput.Update ();
 	}
 
-	void FixedUpdate () //was previously FixedUpdate()
+	void FixedUpdate() //was previously FixedUpdate()
 	{
 		// send the current transform data to the server (should probably be wrapped in an if isAndroid but I haven't tested)
 
-		string path = Application.persistentDataPath + "/WIP_EQUATION_GO.txt";
+		string path = Application.persistentDataPath + "/WIP_FREQ_GO.txt";
 
-
-        // This text is always added, making the file longer over time if it is not deleted
-		string appendText = "\n" + DateTime.Now.ToString() + ";" + 
+		// debug output
+		string appendText = "\r\n" +
 			Time.time + ";" + 
 
 			// NEED TO CHANGE TO WHATEVER IS ANALOGOUS TO THIS IN GIO
@@ -114,61 +128,66 @@ public class AccelerometerInput6 : MonoBehaviour
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall;
+			gateCollider.isTouchingWall + ";" + test;
 
 		File.AppendAllText (path, appendText);
 
 		// do the movement algorithm, more details inside
-		move ();
+		move();
+
 
 
 		if (myClient != null)
-			myClient.Send (MESSAGE_DATA, new TDMessage (this.transform.localPosition, Camera.main.transform.eulerAngles, false));
+			myClient.Send(MESSAGE_DATA, new TDMessage(this.transform.localPosition, Camera.main.transform.eulerAngles, false));
 	}
 
 	// sets the velocity max given the step frequency from frequency()
-	void setMax ()
+	void setMax()
 	{
 		// if this is the first step, prevTime can't be used or very low velocityMax, so set to 1.0f
 		// if not the first step, use equation to set velocityMax
 		if (!firstStep)
-        {
-            // get freq
-            stepTime = Time.time - prevTime;
-			float frequency = 1.0f / stepTime;
+		{
+			// get freq
+			stepTime = Time.time - prevTime;
+			float freq = 1.0f / stepTime;
 
-            // set velocity max with biomedical equation
-            velocityMax = Mathf.Pow (((frequency / 1.57f) * (height / 1.72f)), 2);
+			// debug
+			test = freq;
+
+			// set velocity max by determining velocity given frequency in predetermined quadratically fit equation
+			velocityMax = a * Mathf.Pow(freq, 2.0f) + b * freq + c;
 		}
-        else
-        {
+		else
+		{
 			velocityMax = 0.75f;
 			firstStep = false;
 		}
+
 		// set time of last step to current time
 		prevTime = Time.time;
 	}
 
 	// checks to see if we are currently stepping and then calls setMax() to calculate velocity from discovered step frequency
-	void frequency ()
+	void frequency()
 	{
 		// if we aren't on alert (aka if we are currently just in noise territory and haven't hit some peak recently) AND
 		// if we aren't in the shadow of a previous step (aka if we aren't a secondary peak) then check to see if we have hit a high or low peak
 		// indicating we might be stepping 
 		if (!alert && (Time.time > maxt))
-        {
+		{
 			// checking to see if the signal is beyond the allowed window - INDIVIDUALIZED BOUNDARIES
 			if ((display.acceleration.y < lt) || (display.acceleration.y > ht))
-            {
+			{
 				alert = true;
 				// distingiush if the signal was high or low
 				if (display.acceleration.y < lt)
-                {
+				{
 					low = true;
 					high = false;
 				}
-                else
-                {
+				else
+				{
 					low = false;
 					high = true;
 				}
@@ -178,20 +197,20 @@ public class AccelerometerInput6 : MonoBehaviour
 				maxt = Time.time + 0.25f;
 			}
 		}
-        else if (alert && (Time.time < maxt))
-        {
+		else if (alert && (Time.time < maxt))
+		{
 			// if we are in the alert zone and hit the outside of the other threshold,
 			// then this is a valid peak, call the set max function to determine new max velocity
 			if (unset && ((high && (display.acceleration.y < lt)) || (low && (display.acceleration.y > ht))))
-            {
+			{
 				stepCount++;
 				unset = false;
 				maxt = Time.time + 0.25f;
-				setMax ();
+				setMax();
 			}
 		}
-        else if (alert && (Time.time >= maxt))
-        {
+		else if (alert && (Time.time >= maxt))
+		{
 			// if we have left the max time zone, then reset necessary variables
 			maxy = -100;
 			alert = false;
@@ -203,19 +222,26 @@ public class AccelerometerInput6 : MonoBehaviour
 
 	// algorithm to determine if the user is looking around. Looking and walking generate similar gyro.accelerations, so we
 	//want to ignore movements that could be spawned from looking around. Makes sure user's head orientation is in certain window
-	bool look (double start, double curr, double diff)
+	bool look(double start, double curr, double diff)
 	{
 		//Determines if the user's current angle (curr) is within the window (start +/- diff)
 		//Deals with wrap around values (eulerAngles is in range 0 to 360)
-		if ((start + diff) > 360f) {
-			if (((curr >= 0f) && (curr <= (start + diff - 360f))) || ((((start - diff) <= curr) && (curr <= 360f)))) {
+		if ((start + diff) > 360f)
+		{
+			if (((curr >= 0f) && (curr <= (start + diff - 360f))) || ((((start - diff) <= curr) && (curr <= 360f))))
+			{
 				return false;
 			}
-		} else if ((start - diff) < 0f) {
-			if (((0f <= curr) && (curr <= (start + diff))) || (((start - diff + 360f) <= curr) && (curr <= 360f))) {
+		}
+		else if ((start - diff) < 0f)
+		{
+			if (((0f <= curr) && (curr <= (start + diff))) || (((start - diff + 360f) <= curr) && (curr <= 360f)))
+			{
 				return false;
 			}
-		} else if (((start + diff) <= curr) && (curr <= (start + diff))) {
+		}
+		else if (((start + diff) <= curr) && (curr <= (start + diff)))
+		{
 			return false;
 		}
 		return true;
@@ -223,60 +249,72 @@ public class AccelerometerInput6 : MonoBehaviour
 
 	// if the user is walking, moves them in correct direction with varying velocities
 	// also sets velocity to 0 if it is determined that the user is no longer walking
-	void move ()
+	void move()
 	{
 		// get the yaw of the subject to allow for movement in the look direction
-		yaw = InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.y;
+		yaw = InputTracking.GetLocalRotation(XRNode.Head).eulerAngles.y;
 		// convert that value into radians because math uses radians
 		rad = yaw * Mathf.Deg2Rad;
 		// map that value onto the unit circle to faciliate movement in the look direction
-		zVal = Mathf.Cos (rad);
-		xVal = Mathf.Sin (rad);
+		zVal = Mathf.Cos(rad);
+		xVal = Mathf.Sin(rad);
 
-        // check if person is looking around in X or Z directions
-        bool looking = (look (eulerX, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.x, 20f) || look (eulerZ, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.z, 20f));
+		// check if person is looking around in X or Z directions
+		bool looking = (look(eulerX, InputTracking.GetLocalRotation(XRNode.Head).eulerAngles.x, 20f) || look(eulerZ, InputTracking.GetLocalRotation(XRNode.Head).eulerAngles.z, 20f));
 
-        // set velocity max by using biomedical equation with freq
-        frequency();
+		// set the velocity max by interpolating with freq
+		frequency();
 
 		// if the user isn't looking then manage their walking
-		if (!looking) {
+		if (!looking)
+		{
 			if ((display.acceleration.y >= 0.75f || display.acceleration.y <= -0.75f))
-            {
+			{
 				if (wasTwo)
-                { //we are transitioning from phase 2 to 1
+				{ //we are transitioning from phase 2 to 1
 					method1StartTimeGrow = Time.time;
 					wasTwo = false;
 					wasOne = true;
 				}
 			}
-            else
-            {
+			else
+			{
 				if (wasOne)
-                {
+				{
 					method1StartTimeDecay = Time.time;
 					wasOne = false;
 					wasTwo = true;
 				}
 			}
 			if ((display.acceleration.y >= 0.75f || display.acceleration.y <= -0.75f))
-            {
-				velocity = velocityMax - (velocityMax - velocity) * Mathf.Exp ((method1StartTimeGrow - Time.time) / 0.2f); //grow
+			{
+				velocity = velocityMax + velocityMax / 4.0f - (velocityMax + velocityMax / 4.0f - velocity) * Mathf.Exp((method1StartTimeGrow - Time.time) / 0.5f); //grow
 			}
-            else
-            {
+			else
+			{
 				// if the acceleration values are low, indicates the user is walking slowly, and exponentially decrease the velocity to 0
-				velocity = 0.0f - (0.0f - velocity) * Mathf.Exp ((method1StartTimeDecay - Time.time) / decayRate); //decay
+				velocity = 0.0f - (0.0f - velocity) * Mathf.Exp((method1StartTimeDecay - Time.time) / decayRate); //decay
 			}
 		}
-        else
-        {
+		else
+		{
 			velocity = 0f;
 		}
 
 		// multiply intended speed (called velocity) by delta time to get a distance, then multiply that distamce
 		// by the unit vector in the look direction to get displacement.
-		transform.Translate (xVal * velocity * Time.fixedDeltaTime, 0, zVal * velocity * Time.fixedDeltaTime);
+		if(velocity < 0f)
+		{
+			velocity = 0f;
+		}
+
+		// translate
+		transform.Translate(xVal * velocity * Time.fixedDeltaTime, 0, zVal * velocity * Time.fixedDeltaTime);
+
+		// debug
+		totalVelocityMax += velocityMax;
+		totalVelocity += velocity;
+		totalVelocityCount++;
 	}
 
 	#region NetworkingCode
@@ -298,37 +336,38 @@ public class AccelerometerInput6 : MonoBehaviour
 	//Connection ID for the client server interaction
 	public int _connectionID;
 	//transform data that is being read from the clien
-	public static Vector3 _pos = new Vector3 ();
-	public static Vector3 _euler = new Vector3 ();
+	public static Vector3 _pos = new Vector3();
+	public static Vector3 _euler = new Vector3();
 
 	// Create a client and connect to the server port
-	public void SetupClient ()
+	public void SetupClient()
 	{
-		myClient = new NetworkClient (); //Instantiate the client
-		myClient.RegisterHandler (MESSAGE_DATA, DataReceptionHandler); //Register a handler to handle incoming message data
-		myClient.RegisterHandler (MsgType.Connect, OnConnected); //Register a handler to handle a connection to the server (will setup important info
-		myClient.Connect (SERVER_ADDRESS, SERVER_PORT); //Attempt to connect, this will send a connect request which is good if the OnConnected fires
+		myClient = new NetworkClient(); //Instantiate the client
+		myClient.RegisterHandler(MESSAGE_DATA, DataReceptionHandler); //Register a handler to handle incoming message data
+		myClient.RegisterHandler(MsgType.Connect, OnConnected); //Register a handler to handle a connection to the server (will setup important info
+		myClient.Connect(SERVER_ADDRESS, SERVER_PORT); //Attempt to connect, this will send a connect request which is good if the OnConnected fires
 	}
 
 	// client function to recognized a connection
-	public void OnConnected (NetworkMessage netMsg)
+	public void OnConnected(NetworkMessage netMsg)
 	{
 		_connectionID = netMsg.conn.connectionId; //Keep connection id, not really neccesary I don't think
 	}
 
 	// Clinet function that fires when a disconnect occurs (probably unnecessary
-	public void OnDisconnected (NetworkMessage netMsg)
+	public void OnDisconnected(NetworkMessage netMsg)
 	{
 		_connectionID = -1;
 	}
 
 	//I actually don't know for sure if this is useful. I believe that this is erroneously put here and was duplicated in TDServer code.
-	public void DataReceptionHandler (NetworkMessage _transformData)
+	public void DataReceptionHandler(NetworkMessage _transformData)
 	{
-		TDMessage transformData = _transformData.ReadMessage<TDMessage> ();
+		TDMessage transformData = _transformData.ReadMessage<TDMessage>();
 		_pos = transformData._pos;
 		_euler = transformData._euler;
 	}
 
 	#endregion
 }
+

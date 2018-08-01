@@ -101,7 +101,7 @@ public class AccelerometerInputRateGear : MonoBehaviour
         string path = Application.persistentDataPath + "/WIP_STRIDE_GEAR.txt";
 
         // debug output
-		string appendText ="\n" + DateTime.Now.ToString() + ";" + 
+		string appendText ="\r\n" + DateTime.Now.ToString() + ";" + 
 			Time.time + ";" + 
 
 			Input.GetMouseButton(0) + ";" +
@@ -119,7 +119,7 @@ public class AccelerometerInputRateGear : MonoBehaviour
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall;
+			gateCollider.isTouchingWall + ";" + test;
 
         File.AppendAllText(path, appendText);
 

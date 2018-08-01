@@ -75,7 +75,7 @@ public class AccelerometerInput4 : MonoBehaviour
 			Time.time + ";" + 
 
 			// NEED TO CHANGE TO WHATEVER IS ANALOGOUS TO THIS IN GIO
-			OVRInput.GetDown(OVRInput.Button.One) + ";" +
+			OVRInput.Get(OVRInput.Button.One) + ";" +
 
 			display.acceleration.x + ";" + 
 			display.acceleration.y + ";" + 

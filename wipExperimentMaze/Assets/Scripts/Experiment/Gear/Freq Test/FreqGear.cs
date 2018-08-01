@@ -8,36 +8,48 @@ using System.Text;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public class AccelerometerInput6 : MonoBehaviour
+public class FreqGear : MonoBehaviour
 {
-    // set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
-    public float height = 1.75f;
-    public float ht = 2.8f;
-    public float lt = -2.2f;
+	// set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
+	public float height = 1.75f;
+	public float ht = 0.25f;
+	public float lt = -0.25f;
 
-    // used to determine direction to walk
-    private float yaw;
+	// used to determine direction to walk
+	private float yaw;
 	private float rad;
 	private float xVal;
 	private float zVal;
 
-    // determine if person is picking up speed or slowing down
-    public static float velocity = 0f;
+	// determine if person is picking up speed or slowing down
+	public static float velocity = 0f;
 	public static float method1StartTimeGrow = 0f;
 	public static float method1StartTimeDecay = 0f;
-	//phase one when above (+/-) 0.10 threshold
 	public static bool wasOne = false;
-	//phase two when b/w -0.10 and 0.10 thresholds
+	//phase one when above (+/-) 0.10 threshold
 	public static bool wasTwo = true;
-	private float decayRate = 0.4f;
+	//phase two when b/w -0.10 and 0.10 thresholds
 
-	// initial X and Y angles - used to determine if user is looking around
+	//Initial X and Y angles (used to determine if user is looking around)
 	private float eulerX;
 	private float eulerZ;
 
-	// indicates if person is looking around - not implemented yet
-	bool looking = false;
+	private bool walking = false;
+	private float iteration = 0f;
 
+	//Queue to keep track of past X userAcceleration.Y values
+	private Queue<float> accelY;
+	private float sumY = 0f;
+	private float thresholdAccelY = 0.008f;
+
+	//Queue to keep track of diff between X pairs of current and previous
+	//userAcceleration.Y values
+	private Queue<float> changeY;
+	private float sumChangeY = 0f;
+	private float thresholdChangeY = 0.008f;
+	private float prev = 0f;
+
+	private float decayRate = 0.2f;
 	private float velocityMax = 0.0f;
 
 	// variables for determining the step frequency
@@ -63,47 +75,39 @@ public class AccelerometerInput6 : MonoBehaviour
 	// variable for debugging to see if we are counting the right number of steps
 	private float stepCount = 0f;
 
-    // initialize display to get accelerometer from Oculus GO
-    OVRDisplay display;
+	private float test = 0f;
+
 
 	void Start ()
 	{
-		// enable the gyroscope on the phone
+		//Enable the gyroscope on the phone
 		Input.gyro.enabled = true;
-		// if we are on the right VR, then setup a client device to read transform data from
+		//If we are on the phone, then setup a client device to read transform data from
 		if (Application.platform == RuntimePlatform.Android)
 			SetupClient ();
 
-		// user must be looking ahead at the start
+		//User must be looking ahead at the start
 		eulerX = InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.x;
 		eulerZ = InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.z;
 
-		// initialize the oculus go display
-		display = new OVRDisplay ();
-
-	}
-
-	void Update() {
-		OVRInput.Update ();
+		//Initialize the queues
+		accelY = new Queue<float> ();
+		changeY = new Queue<float> ();
 	}
 
 	void FixedUpdate () //was previously FixedUpdate()
 	{
-		// send the current transform data to the server (should probably be wrapped in an if isAndroid but I haven't tested)
+		string path = Application.persistentDataPath + "/WIP_FREQ_GEAR.txt";
 
-		string path = Application.persistentDataPath + "/WIP_EQUATION_GO.txt";
-
-
-        // This text is always added, making the file longer over time if it is not deleted
-		string appendText = "\n" + DateTime.Now.ToString() + ";" + 
+		// This text is always added, making the file longer over time if it is not deleted
+		string appendText = "\r\n" + 
 			Time.time + ";" + 
 
-			// NEED TO CHANGE TO WHATEVER IS ANALOGOUS TO THIS IN GIO
-			OVRInput.Get(OVRInput.Button.One) + ";" +
+			Input.GetMouseButton(0) + ";" +
 
-			display.acceleration.x + ";" + 
-			display.acceleration.y + ";" + 
-			display.acceleration.z + ";" + 
+			Input.gyro.userAcceleration.x + ";" + 
+			Input.gyro.userAcceleration.y + ";" + 
+			Input.gyro.userAcceleration.z + ";" + 
 
 			gameObject.transform.position.x + ";" + 
 			gameObject.transform.position.y + ";" + 
@@ -114,14 +118,15 @@ public class AccelerometerInput6 : MonoBehaviour
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall;
+			gateCollider.isTouchingWall + ";" + test;
 
 		File.AppendAllText (path, appendText);
 
-		// do the movement algorithm, more details inside
+		//Determine if the user is walking, more details inside
+		manageWalking ();
+		//Do the movement algorithm, more details inside
 		move ();
-
-
+		//Send the current transform data to the server (should probably be wrapped in an if isAndroid but I haven't tested)
 		if (myClient != null)
 			myClient.Send (MESSAGE_DATA, new TDMessage (this.transform.localPosition, Camera.main.transform.eulerAngles, false));
 	}
@@ -132,16 +137,17 @@ public class AccelerometerInput6 : MonoBehaviour
 		// if this is the first step, prevTime can't be used or very low velocityMax, so set to 1.0f
 		// if not the first step, use equation to set velocityMax
 		if (!firstStep)
-        {
-            // get freq
-            stepTime = Time.time - prevTime;
+		{
+			// get freq
+			stepTime = Time.time - prevTime;
 			float frequency = 1.0f / stepTime;
 
-            // set velocity max with biomedical equation
-            velocityMax = Mathf.Pow (((frequency / 1.57f) * (height / 1.72f)), 2);
+			test = frequency;
+			// set velocity max with biomedical equation
+			velocityMax = Mathf.Pow (((frequency / 1.57f) * (height / 1.72f)), 2);
 		}
-        else
-        {
+		else
+		{
 			velocityMax = 0.75f;
 			firstStep = false;
 		}
@@ -152,47 +158,45 @@ public class AccelerometerInput6 : MonoBehaviour
 	// checks to see if we are currently stepping and then calls setMax() to calculate velocity from discovered step frequency
 	void frequency ()
 	{
-		// if we aren't on alert (aka if we are currently just in noise territory and haven't hit some peak recently) AND
-		// if we aren't in the shadow of a previous step (aka if we aren't a secondary peak) then check to see if we have hit a high or low peak
-		// indicating we might be stepping 
+		// if we aren't in the shadow of a previous step (aka if we aren't a secondary peak)
 		if (!alert && (Time.time > maxt))
-        {
+		{
+			// if we aren't on alert (aka if we are currently just in noise territory and haven't hit some peak recently)
 			// checking to see if the signal is beyond the allowed window - INDIVIDUALIZED BOUNDARIES
-			if ((display.acceleration.y < lt) || (display.acceleration.y > ht))
-            {
+			if ((Input.gyro.userAcceleration.y < lt) || (Input.gyro.userAcceleration.y > ht))
+			{
 				alert = true;
 				// distingiush if the signal was high or low
-				if (display.acceleration.y < lt)
-                {
+				if (Input.gyro.userAcceleration.y < lt)
+				{
 					low = true;
 					high = false;
 				}
-                else
-                {
+				else
+				{
 					low = false;
 					high = true;
 				}
-				// set the time window to be the initial value - time window is checked so residual peaks from the step don't count as 
-				// a second distinct step
-				maxy = display.acceleration.y;
+				// set the max to be the initial value
+				maxy = Input.gyro.userAcceleration.y;
 				maxt = Time.time + 0.25f;
 			}
 		}
-        else if (alert && (Time.time < maxt))
-        {
+		else if (alert && (Time.time < maxt))
+		{
 			// if we are in the alert zone and hit the outside of the other threshold,
 			// then this is a valid peak, call the set max function to determine new max velocity
-			if (unset && ((high && (display.acceleration.y < lt)) || (low && (display.acceleration.y > ht))))
-            {
+			if (unset && ((high && (Input.gyro.userAcceleration.y < lt)) || (low && (Input.gyro.userAcceleration.y > ht))))
+			{
 				stepCount++;
 				unset = false;
 				maxt = Time.time + 0.25f;
 				setMax ();
 			}
 		}
-        else if (alert && (Time.time >= maxt))
-        {
-			// if we have left the max time zone, then reset necessary variables
+		else if (alert && (Time.time >= maxt))
+		{
+			// if we have left the max time zone, then reset necessary variables to false
 			maxy = -100;
 			alert = false;
 			low = false;
@@ -201,7 +205,7 @@ public class AccelerometerInput6 : MonoBehaviour
 		}
 	}
 
-	// algorithm to determine if the user is looking around. Looking and walking generate similar gyro.accelerations, so we
+	//Algorithm to determine if the user is looking around. Looking and walking generate similar gyro.accelerations, so we
 	//want to ignore movements that could be spawned from looking around. Makes sure user's head orientation is in certain window
 	bool look (double start, double curr, double diff)
 	{
@@ -221,62 +225,98 @@ public class AccelerometerInput6 : MonoBehaviour
 		return true;
 	}
 
-	// if the user is walking, moves them in correct direction with varying velocities
-	// also sets velocity to 0 if it is determined that the user is no longer walking
+	//Determines if user has met conditions for STARTING to walk (enough acceleration in Y and Z and not looking around)
+	//More lenient than usual conditions because we want the user to start moving IMMEDIATELY when they start walking
+	bool inWindow ()
+	{
+		bool moving = false;
+		double xDif = 20f;
+		double zDif = 15f;
+
+		//Checks if the user is moving enough to be considered walking. Thresholds determined by analyzing typical walking averages.
+		if ((Input.gyro.userAcceleration.y >= 0.045f || Input.gyro.userAcceleration.y <= -0.045f)
+			&& ((Input.gyro.userAcceleration.z < 0.08f) && (Input.gyro.userAcceleration.z > -0.08f))) {
+			moving = true;
+		}
+		//Checks that the user is not looking around
+		if (moving && !look (eulerX, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.x, xDif)
+			&& !look (eulerZ, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.z, zDif)) {
+			return true;
+		}
+		return false;
+	}
+
+	//If the user is walking, moves them in correct direction with varying velocities
+	//Also sets velocity to 0 if it is determined that the user is no longer walking
 	void move ()
 	{
-		// get the yaw of the subject to allow for movement in the look direction
+		//Get the yaw of the subject to allow for movement in the look direction
 		yaw = InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.y;
-		// convert that value into radians because math uses radians
+		//convert that value into radians because math uses radians
 		rad = yaw * Mathf.Deg2Rad;
-		// map that value onto the unit circle to faciliate movement in the look direction
+		//map that value onto the unit circle to faciliate movement in the look direction
 		zVal = Mathf.Cos (rad);
 		xVal = Mathf.Sin (rad);
 
-        // check if person is looking around in X or Z directions
-        bool looking = (look (eulerX, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.x, 20f) || look (eulerZ, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.z, 20f));
+		// set velocity max by using biomedical equation with freq
+		frequency ();
 
-        // set velocity max by using biomedical equation with freq
-        frequency();
+	}
 
-		// if the user isn't looking then manage their walking
-		if (!looking) {
-			if ((display.acceleration.y >= 0.75f || display.acceleration.y <= -0.75f))
-            {
-				if (wasTwo)
-                { //we are transitioning from phase 2 to 1
-					method1StartTimeGrow = Time.time;
-					wasTwo = false;
-					wasOne = true;
+	//Determines if the user is walking by looking at the average value of userAcceleration.Y and the average change in
+	//userAcceleration.Y over the past ~10 time steps
+	void manageWalking ()
+	{
+
+		//iteration is 0 when the user is stopped. iteration is 10 when the queue is full.
+		if (iteration < 9f) {
+			//We only start keeping track of values when the user is determined to be walking (inWindow)
+			//and then we fill the queue with data for the next 9 time steps
+			if (inWindow () || (iteration > 0f)) {
+				//Filling the changeY queue (can't add on first round bc don't have prev value)
+				if (iteration != 0f) {
+					float change = prev - Math.Abs (Input.gyro.userAcceleration.y);
+					changeY.Enqueue (Math.Abs (change));
+					sumChangeY += Math.Abs (change);
 				}
+				//Filling the accelY queue
+				walking = true;
+				accelY.Enqueue (Math.Abs (Input.gyro.userAcceleration.y));
+				iteration++;
+				sumY += Math.Abs (Input.gyro.userAcceleration.y);
 			}
-            else
-            {
-				if (wasOne)
-                {
-					method1StartTimeDecay = Time.time;
-					wasOne = false;
-					wasTwo = true;
-				}
-			}
-			if ((display.acceleration.y >= 0.75f || display.acceleration.y <= -0.75f))
-            {
-				velocity = velocityMax - (velocityMax - velocity) * Mathf.Exp ((method1StartTimeGrow - Time.time) / 0.2f); //grow
-			}
-            else
-            {
-				// if the acceleration values are low, indicates the user is walking slowly, and exponentially decrease the velocity to 0
-				velocity = 0.0f - (0.0f - velocity) * Mathf.Exp ((method1StartTimeDecay - Time.time) / decayRate); //decay
-			}
-		}
-        else
-        {
-			velocity = 0f;
-		}
+			//Setting prev
+			prev = Math.Abs (Input.gyro.userAcceleration.y);
+		} else {
+			//Adding current value to changeY queue
+			float change = prev - Math.Abs (Input.gyro.userAcceleration.y);
+			changeY.Enqueue (Math.Abs (change));
+			sumChangeY += Math.Abs (change);
 
-		// multiply intended speed (called velocity) by delta time to get a distance, then multiply that distamce
-		// by the unit vector in the look direction to get displacement.
-		transform.Translate (xVal * velocity * Time.fixedDeltaTime, 0, zVal * velocity * Time.fixedDeltaTime);
+			//Adding current value to accelY queue
+			accelY.Enqueue (Math.Abs (Input.gyro.userAcceleration.y));
+			sumY += Math.Abs (Input.gyro.userAcceleration.y);
+
+			//If the average over the past ten values for accelY or changeY is below the threshold or the user
+			//is looking around, the user is not walking anymore. Reset everything and walking=false (so velocity is set to 0)
+			//If we are walking, need to keep queue at 10 values, so we remove the oldest value. || ((sumChangeY / 9) < thresholdChangeY) || ((sumY / 10) > 0.8)
+			if (((sumY / 10) < thresholdAccelY) || ((sumChangeY / 9) < thresholdChangeY) || look (eulerX, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.x, 15f) || look (eulerZ, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.z, 10f)) {
+				walking = false;
+				accelY.Clear ();
+				changeY.Clear ();
+				iteration = 0f;
+			} else {
+				//Removing from changeY
+				float temp2 = changeY.Peek ();
+				changeY.Dequeue ();
+				sumChangeY -= temp2;
+				//Removing from accelY
+				float temp = accelY.Peek ();
+				accelY.Dequeue ();
+				sumY -= temp;
+			}
+		} 
+
 	}
 
 	#region NetworkingCode
@@ -331,4 +371,5 @@ public class AccelerometerInput6 : MonoBehaviour
 	}
 
 	#endregion
+
 }
