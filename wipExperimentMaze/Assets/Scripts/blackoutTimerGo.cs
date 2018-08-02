@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class blackoutTimer : MonoBehaviour {
+public class blackoutTimerGo : MonoBehaviour {
 
 	public Camera main;
 	public Camera blackout;
@@ -22,26 +22,27 @@ public class blackoutTimer : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
-		//velocity = AccelerometerInput4.velocity;
+		velocity = AccelerometerInput4.velocity;
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
-		//velocity = AccelerometerInput4.velocity;
+		velocity = AccelerometerInput4.velocity;
+		OVRInput.Update ();
 		walkingStateMachine ();
 	}
 
 	void walkingStateMachine()
 	{
 		if (walkingState == walkingState_waiting) {
-			if (Input.GetMouseButtonDown (0)) {
+			if (OVRInput.Get(OVRInput.Button.One)) {
 				walkingState = walkingState_normal;
 				Debug.Log ("normal");
 				minuteTimer = Time.time;
 			}
 		} else if (walkingState == walkingState_normal) {
-			if (minuteTimer + 60 < Time.time && !(Input.GetMouseButton (0))) {
+			if (minuteTimer + 60 < Time.time && !(OVRInput.Get(OVRInput.Button.One))) {
 				walkingState = walkingState_blackout;
 				Debug.Log ("blackout");
 				secondTimer = Time.time;
@@ -53,7 +54,7 @@ public class blackoutTimer : MonoBehaviour {
 				walkingState = walkingState_waiting2;
 			}
 		} else if (walkingState == walkingState_waiting2) {
-			if (Input.GetMouseButtonUp (0)) {
+			if (OVRInput.Get(OVRInput.Button.One)) {
 				walkingState = walkingState_undoBlackout;
 				main.gameObject.SetActive (true);
 				blackout.gameObject.SetActive (false);

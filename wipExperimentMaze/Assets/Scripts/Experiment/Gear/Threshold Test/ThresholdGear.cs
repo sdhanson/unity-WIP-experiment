@@ -8,7 +8,7 @@ using System.Text;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public class FreqGear : MonoBehaviour
+public class ThresholdGear : MonoBehaviour
 {
 	// set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
 	public float height = GlobalVariables.height;
@@ -97,7 +97,7 @@ public class FreqGear : MonoBehaviour
 
 	void FixedUpdate () //was previously FixedUpdate()
 	{
-		string path = Application.persistentDataPath + "/inGearFreq.txt";
+		string path = Application.persistentDataPath + "/inGearThreshold.txt";
 
 		// This text is always added, making the file longer over time if it is not deleted
 		string appendText =
@@ -118,7 +118,7 @@ public class FreqGear : MonoBehaviour
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall + ";" + test  + "\r\n";
+			gateCollider.isTouchingWall + ";" + test + "\r\n";
 
 		File.AppendAllText (path, appendText);
 

@@ -11,15 +11,15 @@ using UnityEngine.UI;
 public class AccelerometerInputRateGear : MonoBehaviour
 {
     // set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
-    public float height = 1.75f;
-    public float ht = 0.05f;         
-    public  float lt = -0.03f;
+	public float height = GlobalVariables.height;
+	public float ht = GlobalVariables.gearHT;         
+	public  float lt = GlobalVariables.gearLT;
 
     // values for the INDIVIDUALIZED velocity equation - DIFFERENT FROM THE GO
     // given in python script that quadratically fits freq and speed 
-    public float a = -0.08928571f;
-    public float b = 0.78571429f;
-    public float c = 0.42946429f;
+	public float a = GlobalVariables.gearA;
+	public float b = GlobalVariables.gearB;
+	public float c = GlobalVariables.gearC;
 
     // used to determine direction to walk
     private float yaw;

@@ -31,7 +31,7 @@ public class AccelerometerInput4Old : MonoBehaviour {
 
 	void FixedUpdate() //was previously FixedUpdate()
 	{
-		string path = Application.persistentDataPath + "/CW4Test_Data.txt";
+		string path = Application.persistentDataPath + "/WIP_GEAR_MITI.txt";
 
 		// This text is always added, making the file longer over time if it is not deleted
 		string appendText = "\n" + DateTime.Now.ToString() + ";" + 

@@ -483,6 +483,8 @@ GameObject:
   - component: {fileID: 477347656}
   - component: {fileID: 477347655}
   - component: {fileID: 477347654}
+  - component: {fileID: 477347666}
+  - component: {fileID: 477347665}
   - component: {fileID: 477347653}
   - component: {fileID: 477347664}
   - component: {fileID: 477347663}
@@ -728,7 +730,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 477347650}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b0c77a68f2ed404fac2f41aed2746a7, type: 3}
   m_Name: 
@@ -790,6 +792,32 @@ MonoBehaviour:
   message: 
   messageText: {fileID: 0}
   _connectionID: 0
+--- !u!114 &477347665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 477347650}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9ebd490c53582b44b1861f3868fab8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main: {fileID: 0}
+  blackout: {fileID: 0}
+--- !u!114 &477347666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 477347650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c22445f65d2cd546aea55fbee881737, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main: {fileID: 0}
+  blackout: {fileID: 0}
 --- !u!1 &491787398
 GameObject:
   m_ObjectHideFlags: 0

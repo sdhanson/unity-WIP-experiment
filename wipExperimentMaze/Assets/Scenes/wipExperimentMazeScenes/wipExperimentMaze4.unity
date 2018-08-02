@@ -590,6 +590,8 @@ GameObject:
   - component: {fileID: 246099985}
   - component: {fileID: 246099984}
   - component: {fileID: 246099983}
+  - component: {fileID: 246099996}
+  - component: {fileID: 246099995}
   - component: {fileID: 246099994}
   - component: {fileID: 246099993}
   - component: {fileID: 246099992}
@@ -896,6 +898,32 @@ MonoBehaviour:
   message: 
   messageText: {fileID: 0}
   _connectionID: 0
+--- !u!114 &246099995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 246099980}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9ebd490c53582b44b1861f3868fab8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main: {fileID: 0}
+  blackout: {fileID: 0}
+--- !u!114 &246099996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 246099980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c22445f65d2cd546aea55fbee881737, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main: {fileID: 0}
+  blackout: {fileID: 0}
 --- !u!1 &338947917
 GameObject:
   m_ObjectHideFlags: 0

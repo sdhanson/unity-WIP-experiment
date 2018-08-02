@@ -10,10 +10,10 @@ using UnityEngine.UI;
 
 public class AccelerometerInput6 : MonoBehaviour
 {
-    // set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
-    public float height = 1.75f;
-    public float ht = 2.8f;
-    public float lt = -2.2f;
+	// set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
+	public float height = GlobalVariables.height;
+	public float ht = GlobalVariables.goHT;
+	public float lt = GlobalVariables.goLT;
 
     // used to determine direction to walk
     private float yaw;

@@ -8,7 +8,7 @@ using System.Text;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public class FreqGo : MonoBehaviour {
+public class ThresholdGo : MonoBehaviour {
 
 	// set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
 	public float height = GlobalVariables.height;
@@ -100,7 +100,7 @@ public class FreqGo : MonoBehaviour {
 	{
 		// send the current transform data to the server (should probably be wrapped in an if isAndroid but I haven't tested)
 
-		string path = Application.persistentDataPath + "/inGoFreq.txt";
+		string path = Application.persistentDataPath + "/inGoThreshold.txt";
 
 		// debug output
 		string appendText =

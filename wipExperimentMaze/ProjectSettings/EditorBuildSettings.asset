@@ -23,3 +23,6 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/wipExperimentMazeScenes/wipExperimentMaze6.unity
     guid: 039abfbaef6cf21448011d7132f80d46
+  - enabled: 0
+    path: Assets/Scenes/wipTrialMazeScenes/wip2TrialGoThresholds.unity
+    guid: 2f714c2203c70634f8ccb1989d157f99
