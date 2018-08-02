@@ -16,7 +16,7 @@ using TensorFlow;
 public class AccelerometerInputCNN : MonoBehaviour
 {
 	// set per person
-	public float height = GlobalVariables.height;
+	private float height = GlobalVariables.height;
 
     Thread run;
     Thread collect;

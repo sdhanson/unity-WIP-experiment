@@ -12,15 +12,15 @@ public class AccelerometerInputRate : MonoBehaviour {
 
     // set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
 	// set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
-	public float height = GlobalVariables.height;
-	public float ht = GlobalVariables.goHT;         
-	public  float lt = GlobalVariables.goLT;
+	private float height = GlobalVariables.height;
+	private float ht = GlobalVariables.goHT;         
+	private  float lt = GlobalVariables.goLT;
 
 	// values for the INDIVIDUALIZED velocity equation - DIFFERENT FROM THE GO
 	// given in python script that quadratically fits freq and speed 
-	public float a = GlobalVariables.goA;
-	public float b = GlobalVariables.goB;
-	public float c = GlobalVariables.goC;
+	private float a = GlobalVariables.goA;
+	private float b = GlobalVariables.goB;
+	private float c = GlobalVariables.goC;
 
     // used to determine direction to walk
     private float yaw;

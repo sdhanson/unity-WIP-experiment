@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/wipExperimentMazeScenes/wipExperimentMaze1.unity
     guid: 61d941d66af8f4c4493f03629e3956f0
   - enabled: 0
@@ -20,9 +20,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/wipExperimentMazeScenes/wipExperimentMaze5.unity
     guid: 4445e8538638981418e54ad53dfd9e50
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/wipExperimentMazeScenes/wipExperimentMaze6.unity
     guid: 039abfbaef6cf21448011d7132f80d46
   - enabled: 0
     path: Assets/Scenes/wipTrialMazeScenes/wip2TrialGoThresholds.unity
     guid: 2f714c2203c70634f8ccb1989d157f99
+  - enabled: 0
+    path: Assets/Scenes/wipTrialMazeScenes/wip1TrialGearThresholds.unity
+    guid: d18f11e36aeddfd48bc8d389fc701219
+  - enabled: 0
+    path: Assets/Scenes/wipTrialMazeScenes/wip3TrialGearFrequency.unity
+    guid: 67f7df84a44c4de4ea40ef11df9de4ef
+  - enabled: 0
+    path: Assets/Scenes/wipTrialMazeScenes/wip4TrialGoFrequency.unity
+    guid: 8c3b45679ea66d64dbd89dfd74bc9efd

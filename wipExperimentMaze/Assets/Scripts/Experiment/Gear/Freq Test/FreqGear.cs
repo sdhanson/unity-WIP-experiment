@@ -11,9 +11,9 @@ using UnityEngine.UI;
 public class FreqGear : MonoBehaviour
 {
 	// set per person - NEED TO GET HIGH AND LOW THRESHOLDS 
-	public float height = GlobalVariables.height;
-	public float ht = GlobalVariables.gearHT;
-	public float lt = GlobalVariables.gearLT;
+	private float height = GlobalVariables.height;
+	private float ht = GlobalVariables.gearHT;
+	private float lt = GlobalVariables.gearLT;
 
 	// used to determine direction to walk
 	private float yaw;

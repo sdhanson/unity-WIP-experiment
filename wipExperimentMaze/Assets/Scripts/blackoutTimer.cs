@@ -37,13 +37,11 @@ public class blackoutTimer : MonoBehaviour {
 		if (walkingState == walkingState_waiting) {
 			if (Input.GetMouseButtonDown (0)) {
 				walkingState = walkingState_normal;
-				Debug.Log ("normal");
 				minuteTimer = Time.time;
 			}
 		} else if (walkingState == walkingState_normal) {
 			if (minuteTimer + 60 < Time.time && !(Input.GetMouseButton (0))) {
 				walkingState = walkingState_blackout;
-				Debug.Log ("blackout");
 				secondTimer = Time.time;
 			}
 		} else if (walkingState == walkingState_blackout) {
@@ -55,8 +53,8 @@ public class blackoutTimer : MonoBehaviour {
 		} else if (walkingState == walkingState_waiting2) {
 			if (Input.GetMouseButtonUp (0)) {
 				walkingState = walkingState_undoBlackout;
-				main.gameObject.SetActive (true);
 				blackout.gameObject.SetActive (false);
+				main.gameObject.SetActive (true);
 				secondTimer = Time.time;
 			}
 		} else if (walkingState == walkingState_undoBlackout) {
