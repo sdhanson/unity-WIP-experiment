@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/wipExperimentMazeScenes/wipExperimentMaze1.unity
     guid: 61d941d66af8f4c4493f03629e3956f0
   - enabled: 0
@@ -20,7 +20,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/wipExperimentMazeScenes/wipExperimentMaze5.unity
     guid: 4445e8538638981418e54ad53dfd9e50
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/wipExperimentMazeScenes/wipExperimentMaze6.unity
     guid: 039abfbaef6cf21448011d7132f80d46
   - enabled: 0

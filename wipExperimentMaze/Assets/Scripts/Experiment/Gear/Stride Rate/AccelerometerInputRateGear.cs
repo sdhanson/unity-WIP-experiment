@@ -119,7 +119,7 @@ public class AccelerometerInputRateGear : MonoBehaviour
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall + ";" + test;
+			gateCollider.isTouchingWall + ";" + velocity + ";" + test;
 
         File.AppendAllText(path, appendText);
 

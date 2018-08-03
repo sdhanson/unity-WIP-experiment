@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class MazeGen : MonoBehaviour {
 
+	public int sceneNum;
+
 	float[][] angles = new float[][] { 
 		new float[] {-75,-63,54,67,82,-45,-63,-70,50,88,-70,48,55,-57,-47,56,-53,59,-65,-85,61,74,77,-76,74,70,-61,80,-82,63,-60,85,-56,-60,59,-61,87,-57,-50,81,-78,70,-49,-64,-46,48,67,-83,65,-46,-64,72,-68,-58,60,-63,71,88,54,-59,80,-80,76,-51,72,-77,57,-67,64,-75}, 
 
@@ -30,12 +32,10 @@ public class MazeGen : MonoBehaviour {
 	public GameObject wallLeftEnd;
 	public GameObject wallRightEnd;
 	private int SceneSelected;
-	private Scene currentScene;
 
 	// Use this for initialization
 	void Start () {
-		currentScene = SceneManager.GetActiveScene ();
-		getSceneName (currentScene);
+		SceneSelected = sceneNum;
 		float totalAngle = 0;
 		Transform bigWallPrev = gateStart.transform.GetChild (2);
 		Transform smallWallPrev = gateStart.transform.GetChild (1);
@@ -113,38 +113,5 @@ public class MazeGen : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	}
-
-	void getSceneName(Scene other)
-	{
-		if(other.name == "wipExperimentMaze1")
-		{
-			SceneSelected = 0;
-		}
-
-		else if(other.name == "wipExperimentMaze2")
-		{
-			SceneSelected = 1;
-		}
-
-		else if(other.name == "wipExperimentMaze3")
-		{
-			SceneSelected = 2;
-		}
-
-		else if(other.name == "wipExperimentMaze4")
-		{
-			SceneSelected = 3;
-		}
-
-		else if(other.name == "wipExperimentMaze5")
-		{
-			SceneSelected = 4;
-		}
-
-		else if(other.name == "wipExperimentMaze6")
-		{
-			SceneSelected = 5;
-		}
 	}
 }

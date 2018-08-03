@@ -52,7 +52,7 @@ public class AccelerometerInput4Old : MonoBehaviour {
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall;
+			gateCollider.isTouchingWall + ";" + velocity;
 		
 		File.AppendAllText(path, appendText);
 
