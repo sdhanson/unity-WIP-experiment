@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.VR;
+using UnityEngine.XR;
 using System.IO;
 using System;
 using System.Collections.Generic;
@@ -21,12 +21,20 @@ public class AccelerometerInput4Old : MonoBehaviour {
 
 	public static bool advanceState;
 
+	// initial X and Y angles - used to determine if user is looking around
+	private float eulerX;
+	private float eulerZ;
+
 
 	void Start () {
         //Enable the gyroscope on the phone
 		Input.gyro.enabled = true;
         //If we are on the phone, then setup a client device to read transform data from
         if (Application.platform == RuntimePlatform.Android) SetupClient();
+
+		// user must be looking ahead at the start
+		eulerX = InputTracking.GetLocalRotation(XRNode.Head).eulerAngles.x;
+		eulerZ = InputTracking.GetLocalRotation(XRNode.Head).eulerAngles.z;
 	}
 
 	void FixedUpdate() //was previously FixedUpdate()
@@ -65,6 +73,31 @@ public class AccelerometerInput4Old : MonoBehaviour {
 		}
 	}
 
+	bool look(double start, double curr, double diff)
+	{
+		//Determines if the user's current angle (curr) is within the window (start +/- diff)
+		//Deals with wrap around values (eulerAngles is in range 0 to 360)
+		if ((start + diff) > 360f)
+		{
+			if (((curr >= 0f) && (curr <= (start + diff - 360f))) || ((((start - diff) <= curr) && (curr <= 360f))))
+			{
+				return false;
+			}
+		}
+		else if ((start - diff) < 0f)
+		{
+			if (((0f <= curr) && (curr <= (start + diff))) || (((start - diff + 360f) <= curr) && (curr <= 360f)))
+			{
+				return false;
+			}
+		}
+		else if (((start + diff) <= curr) && (curr <= (start + diff)))
+		{
+			return false;
+		}
+		return true;
+	}
+
 	void move ()
 	{
         //Get the yaw of the subject to allow for movement in the look direction
@@ -72,38 +105,44 @@ public class AccelerometerInput4Old : MonoBehaviour {
         //convert that value into radians because math uses radians
 		rad = yaw * Mathf.Deg2Rad;
         //map that value onto the unit circle to faciliate movement in the look direction
-		zVal = 0.55f * Mathf.Cos (rad);
-		xVal = 0.55f * Mathf.Sin (rad);
+		zVal = Mathf.Cos (rad);
+		xVal = Mathf.Sin (rad);
 
-        //If the user is moving their head enough, but not looking up and down (as if they were nodding yes)
-        //To be honest, some of this code is a mystery to me. I am commenting it much later than its creation date
-        //    I think that the first section is when you are stepping and the second when you are not stepping
-        //    The idea is that we have increasing exponential decay (1-e^(-t)) when stepping 
-        //    and decreasing exponential decay (e^-t) when not stepping
-		if ((Input.gyro.userAcceleration.y >= 0.085f || Input.gyro.userAcceleration.y <= -0.085f) &&
-		    (Input.gyro.userAcceleration.z < 0.08f && Input.gyro.userAcceleration.z > -0.08f)) {
-			if (wasTwo) { //we are transitioning from phase 2 to 1
-				method1StartTimeGrow = Time.time;
-				wasTwo = false;
-				wasOne = true;
+		// check if person is looking around in X or Z directions
+		bool looking = (look(eulerX, InputTracking.GetLocalRotation(XRNode.Head).eulerAngles.x, 20f) || look(eulerZ, InputTracking.GetLocalRotation(XRNode.Head).eulerAngles.z, 20f));
+
+		if (!looking) {
+			
+			//If the user is moving their head enough, but not looking up and down (as if they were nodding yes)
+			//To be honest, some of this code is a mystery to me. I am commenting it much later than its creation date
+			//    I think that the first section is when you are stepping and the second when you are not stepping
+			//    The idea is that we have increasing exponential decay (1-e^(-t)) when stepping 
+			//    and decreasing exponential decay (e^-t) when not stepping
+			if ((Input.gyro.userAcceleration.y >= 0.075f || Input.gyro.userAcceleration.y <= -0.075f)) {
+				if (wasTwo) { //we are transitioning from phase 2 to 1
+					method1StartTimeGrow = Time.time;
+					wasTwo = false;
+					wasOne = true;
+				}
+			} else {
+				if (wasOne) {
+					method1StartTimeDecay = Time.time;
+					wasOne = false;
+					wasTwo = true;
+				}
+			}
+
+
+			//Why we have the exact same conditions again is really unknown to me. But again, just as the above comment says
+			if ((Input.gyro.userAcceleration.y >= 0.075f || Input.gyro.userAcceleration.y <= -0.075f)) { //0.08 is an arbitrary threshold
+
+				velocity = 1.65f - (1.65f - velocity) * Mathf.Exp ((method1StartTimeGrow - Time.time) / 0.2f); //grow
+			} else {
+
+				velocity = 0f - (0f - velocity) * Mathf.Exp ((method1StartTimeDecay - Time.time) / 0.4f); //decay
 			}
 		} else {
-			if (wasOne) {
-				method1StartTimeDecay = Time.time;
-				wasOne = false;
-				wasTwo = true;
-			}
-		}
-
-
-        //Why we have the exact same conditions again is really unknown to me. But again, just as the above comment says
-		if ((Input.gyro.userAcceleration.y >= 0.085f || Input.gyro.userAcceleration.y <= -0.085f) &&
-		    (Input.gyro.userAcceleration.z < 0.08f && Input.gyro.userAcceleration.z > -0.08f)) { //0.08 is an arbitrary threshold
-
-			velocity = 3f - (3f - velocity) * Mathf.Exp ((method1StartTimeGrow - Time.time) / 1.6f); //grow
-		} else {
-
-			velocity = 0f - (0f - velocity) * Mathf.Exp ((method1StartTimeDecay - Time.time) / 1.6f); //decay
+			velocity = 0f;
 		}
 
         //Multiply intended speed (called velocity) by delta time to get a distance, then multiply that distamce

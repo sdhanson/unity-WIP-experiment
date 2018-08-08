@@ -5,19 +5,19 @@ using UnityEngine;
 public static class GlobalVariables {
 	public static float height = 1.75f;
 
-	public static float gearHT = 0.125f;
-	public static float gearLT = -0.10f;
+	public static float gearHT = 0.11f;
+	public static float gearLT = -0.09f;
 
-	public static float gearA = -0.30759627f;
-	public static float gearB = 1.55594847f;
-	public static float gearC = -0.32899021f;
+	public static float gearA = -0.97338126f;
+	public static float gearB = 3.70543677f;
+	public static float gearC = -1.45607f;
 
 
-	public static float goHT = 1.16f;
-	public static float goLT = -0.55f;
+	public static float goHT = 1.17f;
+	public static float goLT = -0.785f;
 
-	public static float goA = -0.36832413f;
-	public static float goB = 2.152262f;
-	public static float goC = -1.52601613f;
+	public static float goA = -1.69610643f;
+	public static float goB = 5.8778416f;
+	public static float goC = -3.00495f;
 }
 

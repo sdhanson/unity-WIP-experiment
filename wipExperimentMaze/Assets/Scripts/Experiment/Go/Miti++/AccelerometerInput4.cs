@@ -29,7 +29,7 @@ public class AccelerometerInput4 : MonoBehaviour
 	private float eulerX;
 	private float eulerZ;
 
-	private float decayRate = 0.2f;
+	private float decayRate = 0.4f;
 	bool looking = false;
 
     // initialize display to get accelerometer from Oculus GO
@@ -150,8 +150,8 @@ public class AccelerometerInput4 : MonoBehaviour
 		//convert that value into radians because math uses radians
 		rad = yaw * Mathf.Deg2Rad;
 		//map that value onto the unit circle to faciliate movement in the look direction
-		zVal = 0.55f * Mathf.Cos (rad);
-		xVal = 0.55f * Mathf.Sin (rad);
+		zVal = Mathf.Cos (rad);
+		xVal = Mathf.Sin (rad);
 
         // check if person is looking around in X or Z directions
         bool looking = (look (eulerX, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.x, 20f) || look (eulerZ, InputTracking.GetLocalRotation (XRNode.Head).eulerAngles.z, 20f));
@@ -177,7 +177,7 @@ public class AccelerometerInput4 : MonoBehaviour
 			}
 			if ((display.acceleration.y >= 0.75f || display.acceleration.y <= -0.75f))
             {
-				velocity = 3.0f - (3.0f - velocity) * Mathf.Exp ((method1StartTimeGrow - Time.time) / 0.5f); //grow
+				velocity = 1.65f - (1.65f - velocity) * Mathf.Exp ((method1StartTimeGrow - Time.time) / 0.2f); //grow
 			}
             else
             {

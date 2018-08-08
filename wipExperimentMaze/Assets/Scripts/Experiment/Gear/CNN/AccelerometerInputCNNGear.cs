@@ -59,7 +59,7 @@ public class AccelerometerInputCNNGear : MonoBehaviour
     // list for smoothing out cnn output
     private List<float> latch;
     int latchSum = 0;
-    int latchWidth = 30;
+    int latchWidth = 15;
 
     // determine if person is walking from cnn returned value
     private bool walking = false;
@@ -415,7 +415,7 @@ public class AccelerometerInputCNNGear : MonoBehaviour
             //starting and stopping latency.
             if ((Input.gyro.userAcceleration.y >= 0.075f || Input.gyro.userAcceleration.y <= -0.075f))
             {
-                velocity = 2.5f - (2.5f - velocity) * Mathf.Exp((method1StartTimeGrow - Time.time) / 0.2f); //grow
+                velocity = 1.65f - (1.65f - velocity) * Mathf.Exp((method1StartTimeGrow - Time.time) / 0.2f); //grow
             }
             else
             {

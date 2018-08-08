@@ -278,9 +278,9 @@ public class AccelerometerInputRateGear : MonoBehaviour
 
             //Movement is done exponentially. We want the user to quickly accelerate and quickly decelerate as to minimize
             //starting and stopping latency.
-            if ((Input.gyro.userAcceleration.y >= 0.06f || Input.gyro.userAcceleration.y <= -0.06f))
+            if ((Input.gyro.userAcceleration.y >= 0.075f || Input.gyro.userAcceleration.y <= -0.075f))
             {
-                velocity = velocityMax - (velocityMax - velocity) * Mathf.Exp((method1StartTimeGrow - Time.time) / 0.5f); //grow
+				velocity = velocityMax + velocityMax / 4.0f - (velocityMax + velocityMax / 4.0f - velocity) * Mathf.Exp((method1StartTimeGrow - Time.time) / 0.5f); //grow
             }
             else
             {
