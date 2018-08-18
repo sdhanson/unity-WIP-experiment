@@ -93,6 +93,10 @@ public class ThresholdGear : MonoBehaviour
 		//Initialize the queues
 		accelY = new Queue<float> ();
 		changeY = new Queue<float> ();
+
+		string path = Application.persistentDataPath + "/inGearThreshold.txt";
+
+		File.Delete (path);
 	}
 
 	void FixedUpdate () //was previously FixedUpdate()

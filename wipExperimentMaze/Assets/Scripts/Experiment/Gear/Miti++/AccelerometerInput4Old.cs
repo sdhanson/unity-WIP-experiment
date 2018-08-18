@@ -39,10 +39,10 @@ public class AccelerometerInput4Old : MonoBehaviour {
 
 	void FixedUpdate() //was previously FixedUpdate()
 	{
-		string path = Application.persistentDataPath + "/WIP_GEAR_MITI.txt";
+		string path = Application.persistentDataPath + "/" + WalkingTechManager.statSubject + "_WIP_GEAR_MITI.txt";
 
 		// This text is always added, making the file longer over time if it is not deleted
-		string appendText = "\n" + DateTime.Now.ToString() + ";" + 
+		string appendText = DateTime.Now.ToString() + ";" + 
 			Time.time + ";" + 
 
 			Input.GetMouseButton(0) + ";" +
@@ -60,7 +60,7 @@ public class AccelerometerInput4Old : MonoBehaviour {
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall + ";" + velocity;
+			gateCollider.isTouchingWall + ";" + velocity + "\n";
 		
 		File.AppendAllText(path, appendText);
 

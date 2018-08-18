@@ -90,6 +90,9 @@ public class FreqGo : MonoBehaviour {
 		// initialize the oculus go display
 		display = new OVRDisplay();
 
+		string path = Application.persistentDataPath + "/inGoFreq.txt";
+
+		File.Delete (path);
 	}
 
 	void Update() {

@@ -90,6 +90,9 @@ public class ThresholdGo : MonoBehaviour {
 		// initialize the oculus go display
 		display = new OVRDisplay();
 
+		string path = Application.persistentDataPath + "/inGoThreshold.txt";
+
+		File.Delete (path);
 	}
 
 	void Update() {

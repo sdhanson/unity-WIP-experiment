@@ -131,10 +131,10 @@ public class AccelerometerInputCNN : MonoBehaviour
     {
         // send the current transform data to the server (should probably be wrapped in an if isAndroid but I haven't tested)
 
-        string path = Application.persistentDataPath + "/WIP_CNN_GO.txt";
+		string path = Application.persistentDataPath + "/" + WalkingTechManager.statSubject + "_WIP_CNN_GO.txt";
 
         // debugging output
-		string appendText = "\n" + DateTime.Now.ToString() + ";" + 
+		string appendText = DateTime.Now.ToString() + ";" + 
 			Time.time + ";" + 
 
 			// NEED TO CHANGE TO WHATEVER IS ANALOGOUS TO THIS IN GIO
@@ -153,7 +153,7 @@ public class AccelerometerInputCNN : MonoBehaviour
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall + ";" + velocity;
+			gateCollider.isTouchingWall + ";" + velocity + "\n";
 
         File.AppendAllText(path, appendText);
 

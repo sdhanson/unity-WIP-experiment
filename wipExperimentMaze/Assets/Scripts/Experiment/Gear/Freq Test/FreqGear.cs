@@ -93,6 +93,10 @@ public class FreqGear : MonoBehaviour
 		//Initialize the queues
 		accelY = new Queue<float> ();
 		changeY = new Queue<float> ();
+
+		string path = Application.persistentDataPath + "/inGearFreq.txt";
+
+		File.Delete (path);
 	}
 
 	void FixedUpdate () //was previously FixedUpdate()

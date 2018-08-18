@@ -98,10 +98,10 @@ public class AccelerometerInputRateGear : MonoBehaviour
     {
         // send the current transform data to the server (should probably be wrapped in an if isAndroid but I haven't tested)
 
-        string path = Application.persistentDataPath + "/WIP_STRIDE_GEAR.txt";
+		string path = Application.persistentDataPath + "/" + WalkingTechManager.statSubject + "_WIP_STRIDE_GEAR.txt";
 
         // debug output
-		string appendText ="\r\n" + DateTime.Now.ToString() + ";" + 
+		string appendText = DateTime.Now.ToString() + ";" + 
 			Time.time + ";" + 
 
 			Input.GetMouseButton(0) + ";" +
@@ -119,7 +119,7 @@ public class AccelerometerInputRateGear : MonoBehaviour
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall + ";" + velocity + ";" + test;
+			gateCollider.isTouchingWall + ";" + velocity + ";" + test + "\r\n";
 
         File.AppendAllText(path, appendText);
 

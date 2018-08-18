@@ -68,10 +68,10 @@ public class AccelerometerInput4 : MonoBehaviour
 	{
 
 		//Send the current transform data to the server (should probably be wrapped in an if isAndroid but I haven't tested)
-		string path = Application.persistentDataPath + "/WIP_MITIP_GO.txt";
+		string path = Application.persistentDataPath + "/" + WalkingTechManager.statSubject + "_WIP_MITIP_GO.txt";
 
         // debug output
-		string appendText = "\n" + DateTime.Now.ToString() + ";" + 
+		string appendText = DateTime.Now.ToString() + ";" + 
 			Time.time + ";" + 
 
 			// NEED TO CHANGE TO WHATEVER IS ANALOGOUS TO THIS IN GIO
@@ -90,7 +90,7 @@ public class AccelerometerInput4 : MonoBehaviour
 			UnityEngine.XR.InputTracking.GetLocalRotation (UnityEngine.XR.XRNode.Head).eulerAngles.z + ";" +
 
 			gateCollider.isInGate + ";" + 
-			gateCollider.isTouchingWall + ";" + velocity;
+			gateCollider.isTouchingWall + ";" + velocity + "\n";
 
 		File.AppendAllText (path, appendText);
 
