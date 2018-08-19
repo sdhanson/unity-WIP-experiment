@@ -16,6 +16,8 @@ public class WalkingTechManager : MonoBehaviour {
 		statTrial = trialNumber;
 		System.Type[] conditionOrder = new System.Type[6];
 
+		this.transform.position = this.transform.position + new Vector3 (0f, GlobalVariables.height - 2.74f + 1.26f, 0f);
+
 		if (trialNumber < 0) {
 			switch (trialNumber) {
 			case -4:

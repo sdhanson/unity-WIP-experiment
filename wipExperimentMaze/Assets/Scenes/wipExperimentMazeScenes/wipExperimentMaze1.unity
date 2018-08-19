@@ -466,7 +466,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66de4405e7f62854398a1f2849c22ece, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subjectNumber: 3
+  subjectNumber: 0
   trialNumber: -3
 --- !u!114 &159656514
 MonoBehaviour:
