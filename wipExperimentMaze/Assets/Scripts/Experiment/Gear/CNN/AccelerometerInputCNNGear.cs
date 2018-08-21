@@ -157,8 +157,10 @@ public class AccelerometerInputCNNGear : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        collect.Abort();
-        run.Abort();
+		if (collect != null)
+	        collect.Abort();
+		if (run != null)
+			run.Abort();
     }
 
     // manages the accelerometer data collection thread
